@@ -1,13 +1,15 @@
-from curses.textpad import rectangle
-from itertools import count
+from statistics import mode
 from pyspark import SparkConf
 from pyspark.sql import SparkSession
 from pyspark.sql.types import StructType, StructField, StringType, IntegerType, FloatType
 from pyspark.ml.recommendation import ALS
+from pyspark.ml.tuning import TrainValidationSplit, ParamGridBuilder
+from pyspark.ml.evaluation import RegressionEvaluator
 import csv
 
 ASSIGN_VIEW_CONST = 1
-ASSIGN_BUY_CONST = 1
+ASSIGN_BUY_CONST = 100
+SPLIT_COEF = [0.8, 0.2]
 
 # Prepare ratings
 
@@ -86,18 +88,44 @@ schema = StructType([
     StructField("rating", FloatType(), True)])
 
 ratingsDF = spark.read.csv("R.csv", header=False, sep=",", schema=schema, nanValue='')
-ratingsDF.withColumn('user_id', ratingsDF['user_id'].cast("int"))
-ratingsDF.withColumn('item_id', ratingsDF['item_id'].cast("int"))
-
 ratingsDF.printSchema()
 
+(training, test) = ratingsDF.randomSplit(SPLIT_COEF)
+
 # By default ALS assumes explicit feedback. One can change that by setting implicitPrefs=True.
-als = ALS(rank=3, maxIter=10, regParam=.01,
-          userCol="user_id", itemCol="item_id", ratingCol="rating")
-model = als.fit(ratingsDF)
+als = ALS(rank=10, maxIter=10, regParam=1.0,
+          userCol="user_id", itemCol="item_id", ratingCol="rating", coldStartStrategy="drop", nonnegative=True)
 
-top_5_recommend = model.recommendForAllUsers(5)
+# Tune model
+param_grid = ParamGridBuilder()\
+                .addGrid(als.rank, [12, 13, 14])\
+                .addGrid(als.maxIter, [18, 19, 20])\
+                .addGrid(als.regParam, [.17, .18, .19])\
+                .build()
 
+evaluator = RegressionEvaluator(metricName="rmse", labelCol="rating", predictionCol="prediction")
+
+
+# Build cross validation
+tvs = TrainValidationSplit(estimator=als, estimatorParamMaps=param_grid, evaluator=evaluator)
+
+# Fit ALS to training data and extract best
+model = tvs.fit(training)
+best_model = model.bestModel
+
+# Generate predictions for testing part of data
+predictions = best_model.transform(test)
+rmse = evaluator.evaluate(predictions)
+
+print("RMSE => " + str(rmse))
+print("-------------")
+print("Rank: " + best_model.rank)
+print("MaxIter: " + best_model._java_obj.parent().getIterMax())
+print("RegParam: " + best_model._java_obj.parent().getRegParam())
+
+
+# After best model acquired generate final csv for all
+top_5_recommend = best_model.recommendForAllUsers(5)
 output = csv.writer(open('final.csv', "w"))
 output.writerow(['customer_id','product_id'])
 for row in top_5_recommend.collect():

@@ -1,2 +1,5 @@
 rds-combined-ca-bundle.pem
+**.csv
+**/node_modules/
+
 data/*

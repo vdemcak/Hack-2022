@@ -1,0 +1,178 @@
+@import "reset";
+@import url(https://use.typekit.net/tpw8nyy.css);
+
+html,
+body,
+#root {
+  height: 100%;
+  width: 100%;
+}
+
+body {
+  background-color: #0d121a;
+}
+
+.view {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  grid-template-rows: 1fr;
+}
+
+.sidebar {
+  padding: 30px 0 0 45px;
+  position: relative;
+  grid-area: 1 / 1 / 2 / 2;
+
+  display: flex;
+  flex-direction: column;
+
+  nav {
+    display: flex;
+    flex-direction: column;
+
+    a {
+      font-family: "Termina", sans-serif;
+      font-size: 0.8rem;
+      color: #bfbfbf;
+      font-weight: 500;
+
+      text-decoration: none;
+
+      margin-top: 15px;
+    }
+  }
+
+  img {
+    width: 60%;
+  }
+  .separator {
+    font-family: "Termina", sans-serif;
+    font-size: 0.6rem;
+    text-transform: uppercase;
+    color: #252a30;
+    font-weight: 600;
+
+    margin: 100px 0 0 0;
+  }
+}
+.model {
+  grid-area: 1 / 2 / 2 / 3;
+  padding-top: 60px;
+  padding-left: 100px;
+  padding-right: 100px;
+}
+
+.model-info {
+  .model-title {
+    font-family: "Termina", sans-serif;
+    font-size: 2.5rem;
+    color: #bfbfbf;
+    font-weight: 500;
+  }
+  .model-specs {
+    margin-top: 30px;
+    display: flex;
+
+    .model-spec {
+      display: flex;
+      flex-direction: column;
+
+      padding-right: 50px;
+      .title {
+        font-family: "Termina", sans-serif;
+        font-size: 0.6rem;
+        color: #bfbfbf;
+        font-weight: 500;
+      }
+      .content {
+        font-family: "Termina", sans-serif;
+        font-size: 0.55rem;
+        color: white;
+        font-weight: 500;
+        padding-top: 4px;
+      }
+    }
+  }
+}
+.model-content {
+  margin-top: 100px;
+  .header {
+    display: flex;
+    padding-bottom: 7px;
+    border-bottom: 2px solid rgba(255, 255, 255, 0.104);
+    .column {
+      font-family: "Termina", sans-serif;
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      color: #bfbfbf;
+      font-weight: 600;
+      padding-right: 380px;
+      padding-left: 5px;
+    }
+  }
+  .entries {
+    display: flex;
+    flex-direction: column;
+    .entry {
+      margin-top: 10px;
+      padding: 10px 5px 10px 5px;
+      border-radius: 5px;
+
+      background-color: #151d2a;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      span {
+        font-family: "Termina", sans-serif;
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        color: #bfbfbf;
+        font-weight: 600;
+      }
+    }
+  }
+}
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  span {
+    font-family: "Termina", sans-serif;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    color: #bfbfbf;
+    font-weight: 600;
+    margin-left: 10px;
+  }
+}
+.forward,
+.backward {
+  font-family: "Termina", sans-serif;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  color: #bfbfbf;
+  font-weight: 600;
+
+  padding: 7px 10px;
+  background-color: #151d2a;
+  width: fit-content;
+  border-radius: 3px;
+  margin-left: 10px;
+  margin-top: 30px;
+  margin-bottom: 30px;
+
+  cursor: pointer;
+}
+.loading {
+  width: 100%;
+
+  text-align: center;
+  margin: 50px 0;
+
+  font-family: "Termina", sans-serif;
+  font-size: 1.4rem;
+  text-transform: uppercase;
+  color: #bfbfbf;
+  font-weight: 600;
+}

@@ -7,7 +7,7 @@ from pyspark.ml.tuning import TrainValidationSplit, ParamGridBuilder
 from pyspark.ml.evaluation import RegressionEvaluator
 import csv
 
-ASSIGN_VIEW_CONST = 1
+ASSIGN_VIEW_CONST = 3
 ASSIGN_BUY_CONST = 100
 SPLIT_COEF = [0.8, 0.2]
 
@@ -76,17 +76,17 @@ for produser in weights:
 # ALGORITHM
 # https://everdark.github.io/k9/notebooks/ml/matrix_factorization/matrix_factorization.nb.html#53_spark_mllib
 
-# conf = SparkConf().setAll([('spark.executor.memory', '1g'),
-#                            ('spark.executor.cores', '1'),
-#                            ('spark.cores.max', '2'),
-#                            ('spark.driver.memory', '2g'),
-#                            ("spark.app.name", "bloomreach_challenge")])
+conf = SparkConf().setAll([('spark.executor.memory', '250g'),
+                            ('spark.executor.cores', '7'),
+                            ('spark.cores.max', '8'),
+                            ('spark.driver.memory', '100g'),
+                            ("spark.app.name", "bloomreach_challenge")])
 spark = SparkSession.builder.appName('bloomreach_challenge').getOrCreate()
 schema = StructType([
     StructField("user_id", IntegerType(), True),
     StructField("item_id", IntegerType(), True),
     StructField("rating", FloatType(), True)])
-
+spark.sparkContext.setCheckpointDir("checkpoint/")
 ratingsDF = spark.read.csv("R.csv", header=False, sep=",", schema=schema, nanValue='')
 ratingsDF.printSchema()
 
@@ -94,13 +94,13 @@ ratingsDF.printSchema()
 
 # By default ALS assumes explicit feedback. One can change that by setting implicitPrefs=True.
 als = ALS(rank=10, maxIter=10, regParam=1.0,
-          userCol="user_id", itemCol="item_id", ratingCol="rating", coldStartStrategy="drop", nonnegative=True)
+          userCol="user_id", itemCol="item_id", ratingCol="rating", coldStartStrategy="drop", nonnegative=True, checkpointInterval=2)
 
 # Tune model
 param_grid = ParamGridBuilder()\
-                .addGrid(als.rank, [12, 13, 14])\
-                .addGrid(als.maxIter, [18, 19, 20])\
-                .addGrid(als.regParam, [.17, .18, .19])\
+                .addGrid(als.rank, [10, 50, 75, 100])\
+                .addGrid(als.maxIter, [5, 30, 75, 100])\
+                .addGrid(als.regParam, [.01, .05, .1, .15])\
                 .build()
 
 evaluator = RegressionEvaluator(metricName="rmse", labelCol="rating", predictionCol="prediction")
@@ -119,9 +119,9 @@ rmse = evaluator.evaluate(predictions)
 
 print("RMSE => " + str(rmse))
 print("-------------")
-print("Rank: " + best_model.rank)
-print("MaxIter: " + best_model._java_obj.parent().getIterMax())
-print("RegParam: " + best_model._java_obj.parent().getRegParam())
+print("Rank: " + str(best_model.rank))
+#print("MaxIter: " + best_model._java_obj.parent().getIterMax())
+#print("RegParam: " + best_model._java_obj.parent().getRegParam())
 
 
 # After best model acquired generate final csv for all

@@ -40,7 +40,7 @@ const BPRImplicit = () => {
             </div>
             <div className='model-spec'>
               <span className='title'>FACTOR / REGULARIZATION / ITERATIONS</span>
-              <span className='content'>- / - / -</span>
+              <span className='content'>100 / 0.01 / 100</span>
             </div>
             <div className='model-spec'>
               <span className='title'>Final Score</span>
